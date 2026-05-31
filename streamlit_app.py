@@ -47,12 +47,19 @@ col_left, col_right = st.columns([2, 1])
 with col_left:
     st.subheader("即時攝影機偵測")
     webrtc_streamer(
-        key="ai_fitness_game",
-        video_transformer_factory=GameVideoTransformer,
-        media_stream_constraints={"video": True, "audio": False},
-        async_processing=True,
-        video_html_attrs={"autoPlay": True, "playsInline": True},
-    )
+    key="camera",
+
+    media_stream_constraints={
+        "video": {
+            "width": 320,
+            "height": 240,
+            "frameRate": 10
+        },
+        "audio": False,
+    },
+
+    async_processing=True
+)
     st.info("偵測到動作後，遊戲會自動更新。請確認瀏覽器已允許相機存取。")
 
 with col_right:
