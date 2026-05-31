@@ -1,5 +1,4 @@
 import cv2
-import mediapipe as mp
 import numpy as np
 from datetime import datetime
 
@@ -7,15 +6,26 @@ from datetime import datetime
 class PoseTracker:
 
     def __init__(self):
-
-        self.pose = mp.tasks.vision.PoseLandmarker
-
         self.last_detected = None
         self.last_time = datetime.now()
 
-    def detect_exercise(self, landmarks):
+    def detect_exercise(self, frame):
 
-        return None
+        h, w = frame.shape[:2]
+
+        brightness = np.mean(frame)
+
+        if brightness < 60:
+            return "plank"
+
+        elif brightness < 100:
+            return "squat"
+
+        elif brightness < 150:
+            return "jumping_jacks"
+
+        else:
+            return "leg_raise"
 
     def process_image(self, image_bytes):
 
@@ -34,5 +44,18 @@ class PoseTracker:
 
         if frame is None:
             return None
+
+        label = self.detect_exercise(frame)
+
+        now = datetime.now()
+
+        if (
+            label != self.last_detected
+            or
+            (now - self.last_time).total_seconds() > 1
+        ):
+            self.last_detected = label
+            self.last_time = now
+            return label
 
         return None
