@@ -1,0 +1,45 @@
+body {
+    margin: 0;
+    font-family: 'Noto Sans TC', sans-serif;
+    background: #121212;
+    color: #f4f4f4;
+}
+.container {
+    display: flex;
+    gap: 24px;
+    padding: 24px;
+}
+.left-panel, .right-panel {
+    flex: 1;
+    background: #1e1e1e;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+}
+video, img {
+    width: 100%;
+    border-radius: 12px;
+    margin-bottom: 16px;
+}
+.camera-status {
+    margin-top: 8px;
+    color: #a3e635;
+}
+.status-box {
+    background: rgba(255,255,255,0.05);
+    padding: 16px;
+    border-radius: 12px;
+}
+.status-box p {
+    margin: 10px 0;
+    line-height: 1.6;
+}
+.info-card {
+    margin-top: 16px;
+    background: rgba(255,255,255,0.05);
+    padding: 16px;
+    border-radius: 12px;
+}
+.info-card ul {
+    padding-left: 20px;
+}

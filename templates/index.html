@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI 燃脂闖關遊戲</title>
+    <link rel="stylesheet" href="/static/style.css" />
+    <script>
+        async function fetchStatus() {
+            const response = await fetch('/status');
+            const data = await response.json();
+            document.getElementById('player-hp').innerText = `${data.player.hp} / ${data.player.max_hp}`;
+            document.getElementById('boss-hp').innerText = `${data.boss.hp} / ${data.boss.max_hp}`;
+            document.getElementById('calories').innerText = data.player.calories;
+            document.getElementById('score').innerText = data.player.score;
+            document.getElementById('action').innerText = data.player.last_action;
+            document.getElementById('exercise-time').innerText = data.player.exercise_time;
+            document.getElementById('bmi').innerText = data.player.bmi;
+            if (data.latest_record.date) {
+                document.getElementById('latest-record').innerText = `最後紀錄：${data.latest_record.date}，卡路里 ${data.latest_record.calories}，分數 ${data.latest_record.score}`;
+            }
+        }
+
+        function startCamera() {
+            const video = document.getElementById('camera');
+            const status = document.getElementById('camera-status');
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(stream => {
+                    video.srcObject = stream;
+                    video.play();
+                    status.innerText = '相機已啟動，開始自動偵測。';
+                    captureLoop();
+                })
+                .catch(err => {
+                    status.innerText = '無法開啟相機：' + err.message;
+                });
+        }
+
+        async function captureLoop() {
+            const video = document.getElementById('camera');
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            canvas.width = 320;
+            canvas.height = 240;
+
+            while (true) {
+                if (video.readyState >= 2) {
+                    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.7));
+                    if (blob) {
+                        try {
+                            await fetch('/detect', { method: 'POST', body: blob });
+                        } catch (err) {
+                            console.error('偵測失敗', err);
+                        }
+                    }
+                }
+                await new Promise(resolve => setTimeout(resolve, 400));
+            }
+        }
+
+        setInterval(fetchStatus, 1000);
+        window.addEventListener('load', () => {
+            startCamera();
+            fetchStatus();
+        });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="left-panel">
+            <h1>玩家</h1>
+            <video id="camera" autoplay playsinline muted></video>
+            <p id="camera-status" class="camera-status">正在啟動相機...</p>
+            <div class="status-box">
+                <p>HP: <span id="player-hp">0 / 0</span></p>
+                <p>BMI: <span id="bmi">0</span></p>
+                <p>動作: <span id="action">等待動作</span></p>
+                <p>運動時間: <span id="exercise-time">0</span> 秒</p>
+            </div>
+        </div>
+        <div class="right-panel">
+            <h1>Boss 戰</h1>
+            <div class="status-box">
+                <p>Boss HP: <span id="boss-hp">0 / 0</span></p>
+                <p>卡路里: <span id="calories">0</span></p>
+                <p>分數: <span id="score">0</span></p>
+                <p id="latest-record">最後紀錄：尚無</p>
+            </div>
+            <div class="info-card">
+                <h2>遊戲說明</h2>
+                <ul>
+                    <li>深蹲 → 攻擊</li>
+                    <li>開合跳 → 集氣</li>
+                    <li>抬腿 → 閃避</li>
+                    <li>平板撐 → 防禦</li>
+                </ul>
+                <p>開啟相機後，系統會自動偵測你的動作並開始遊戲。</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

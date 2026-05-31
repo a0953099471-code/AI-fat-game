@@ -1,0 +1,7 @@
+opencv-python
+mediapipe==0.10.13
+pandas
+numpy
+streamlit
+streamlit-webrtc
+av
